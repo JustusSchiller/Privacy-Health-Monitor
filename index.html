@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Health Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00CED1 0%, #00BFFF 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f7fafc;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e53e3e;
+        }
+
+        .status-indicator.connected {
+            background: #38a169;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-item .label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .health-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #f0fff4;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #744210;
+            border: 1px solid #f6e05e;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .period-timeline {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .health-form {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Privacy Health Monitor</h1>
+            <p>Secure encrypted health data monitoring system</p>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="card">
+            <h2>📡 Connection Status</h2>
+            <div class="connection-status">
+                <div class="status-indicator" id="connectionIndicator"></div>
+                <span id="connectionStatus">Disconnected</span>
+            </div>
+            <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+            <button class="btn btn-secondary" onclick="switchToSepolia()">Switch to Sepolia</button>
+        </div>
+
+        <!-- Contract Info -->
+        <div class="card">
+            <h2>📋 Contract Information</h2>
+            <div class="form-group">
+                <label for="contractAddress">Contract Address:</label>
+                <input type="text" id="contractAddress" placeholder="Enter contract address">
+                <button class="btn" onclick="loadContract()">Load Contract</button>
+            </div>
+            <div id="contractInfo" style="display: none;">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Current Period</div>
+                        <div class="value" id="currentPeriod">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Period Active</div>
+                        <div class="value" id="periodActive">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Reports Count</div>
+                        <div class="value" id="reportCount">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Time Remaining</div>
+                        <div class="value" id="timeRemaining">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('patient')">👤 Patient</div>
+                <div class="tab" onclick="switchTab('doctor')">👨‍⚕️ Doctor</div>
+                <div class="tab" onclick="switchTab('admin')">⚙️ Admin</div>
+            </div>
+
+            <!-- Patient Tab -->
+            <div id="patientTab" class="tab-content active">
+                <h2>📊 Submit Health Data</h2>
+                <div id="patientReportStatus"></div>
+                <form class="health-form" onsubmit="submitHealthData(event)">
+                    <div class="form-group">
+                        <label for="heartRate">Heart Rate (BPM):</label>
+                        <input type="number" id="heartRate" min="30" max="200" required>
+                        <small>Normal: 60-100 BPM</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="systolic">Systolic BP (mmHg):</label>
+                        <input type="number" id="systolic" min="80" max="200" required>
+                        <small>Normal: &lt;130 mmHg</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="diastolic">Diastolic BP (mmHg):</label>
+                        <input type="number" id="diastolic" min="40" max="120" required>
+                        <small>Normal: &lt;80 mmHg</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="glucose">Blood Glucose (mg/dL):</label>
+                        <input type="number" id="glucose" min="40" max="400" required>
+                        <small>Normal: 70-100 mg/dL</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°F):</label>
+                        <input type="number" id="temperature" min="95" max="110" step="0.1" required>
+                        <small>Normal: 98.6°F</small>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Submit Health Data</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Doctor Tab -->
+            <div id="doctorTab" class="tab-content">
+                <h2>👨‍⚕️ Doctor Functions</h2>
+                <div class="form-group">
+                    <label for="periodSelect">Select Period:</label>
+                    <select id="periodSelect">
+                        <option value="current">Current Period</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="generateSummary()">Generate Period Summary</button>
+                <button class="btn btn-secondary" onclick="viewPeriodHistory()">View Period History</button>
+
+                <h3>Emergency Access</h3>
+                <div class="form-group">
+                    <label for="emergencyPatient">Patient Address:</label>
+                    <input type="text" id="emergencyPatient" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label for="emergencyPeriod">Period Number:</label>
+                    <input type="number" id="emergencyPeriod" min="1">
+                </div>
+                <button class="btn btn-danger" onclick="requestEmergencyAccess()">Request Emergency Access</button>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="adminTab" class="tab-content">
+                <h2>⚙️ Admin Functions</h2>
+                <button class="btn" onclick="startNewPeriod()">Start New Period</button>
+
+                <h3>Authorize Users</h3>
+                <div class="form-group">
+                    <label for="patientAddress">Patient Address:</label>
+                    <input type="text" id="patientAddress" placeholder="0x...">
+                    <button class="btn" onclick="authorizePatient()">Authorize Patient</button>
+                </div>
+                <div class="form-group">
+                    <label for="doctorAddress">Doctor Address:</label>
+                    <input type="text" id="doctorAddress" placeholder="0x...">
+                    <button class="btn" onclick="authorizeDoctor()">Authorize Doctor</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Log -->
+        <div class="card">
+            <h2>📝 Recent Events</h2>
+            <div id="eventsLog" style="max-height: 300px; overflow-y: auto;">
+                <p style="color: #718096;">No events yet...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Check if ethers loaded, fallback to unpkg CDN
+        if (typeof ethers === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js';
+            script.onload = () => {
+                if (typeof ethers === 'undefined') {
+                    showAlert('Failed to load ethers.js library. Please refresh the page.', 'error');
+                }
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    <script>
+        let provider;
+        let signer;
+        let contract;
+        let userAddress;
+
+        const CONTRACT_ABI = [
+            "function owner() view returns (address)",
+            "function currentPeriod() view returns (uint32)",
+            "function authorizedPatients(address) view returns (bool)",
+            "function authorizedDoctors(address) view returns (bool)",
+            "function isReportingPeriodActive() view returns (bool)",
+            "function getCurrentPeriodInfo() view returns (uint32 period, uint256 startTime, uint256 endTime, bool periodActive, uint256 reporterCount)",
+            "function getPatientReportStatus(address patient) view returns (bool hasReported, uint256 timestamp)",
+            "function getTimeRemainingInPeriod() view returns (uint256)",
+            "function authorizePatient(address patient)",
+            "function authorizeDoctor(address doctor)",
+            "function startNewPeriod()",
+            "function submitHealthData(uint8 _heartRate, uint8 _systolic, uint8 _diastolic, uint8 _glucose, uint8 _temperature)",
+            "function generatePeriodSummary()",
+            "function requestEmergencyAccess(address patient, uint32 periodNumber)",
+            "function getPeriodHistory(uint32 periodNumber) view returns (uint256 startTime, uint256 endTime, bool summaryGenerated, uint256 reporterCount)",
+            "event PeriodStarted(uint32 indexed period, uint256 startTime)",
+            "event HealthDataSubmitted(address indexed patient, uint32 indexed period)",
+            "event SummaryGenerated(uint32 indexed period, uint256 totalReports)",
+            "event PatientAuthorized(address indexed patient)",
+            "event DoctorAuthorized(address indexed doctor)",
+            "event AlertTriggered(address indexed patient, uint32 indexed period, string alertType)"
+        ];
+
+        async function connectWallet() {
+            try {
+                // Check if ethers is loaded
+                if (typeof ethers === 'undefined') {
+                    showAlert('Ethers.js library is still loading. Please wait a moment and try again.', 'warning');
+                    return;
+                }
+
+                if (typeof window.ethereum !== 'undefined') {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+
+                    updateConnectionStatus(true);
+                    showAlert('Wallet connected successfully!', 'success');
+
+                    // Check network
+                    const network = await provider.getNetwork();
+                    if (network.chainId !== 11155111) {
+                        showAlert('Please switch to Sepolia testnet', 'warning');
+                    }
+                } else {
+                    showAlert('Please install MetaMask!', 'error');
+                }
+            } catch (error) {
+                console.error('Connection failed:', error);
+                showAlert('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+
+        async function switchToSepolia() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0xaa36a7' }],
+                });
+                showAlert('Switched to Sepolia network', 'success');
+            } catch (error) {
+                if (error.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0xaa36a7',
+                                chainName: 'Sepolia Testnet',
+                                nativeCurrency: {
+                                    name: 'ETH',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                blockExplorerUrls: ['https://sepolia.etherscan.io/']
+                            }]
+                        });
+                    } catch (addError) {
+                        showAlert('Failed to add Sepolia network', 'error');
+                    }
+                } else {
+                    showAlert('Failed to switch network: ' + error.message, 'error');
+                }
+            }
+        }
+
+        async function loadContract() {
+            const address = document.getElementById('contractAddress').value;
+            if (!address || !signer) {
+                showAlert('Please enter contract address and connect wallet first', 'error');
+                return;
+            }
+
+            try {
+                contract = new ethers.Contract(address, CONTRACT_ABI, signer);
+                await updateContractInfo();
+                document.getElementById('contractInfo').style.display = 'block';
+                showAlert('Contract loaded successfully!', 'success');
+
+                // Setup event listeners
+                setupEventListeners();
+
+                // Check user permissions
+                await checkUserPermissions();
+
+            } catch (error) {
+                console.error('Failed to load contract:', error);
+                showAlert('Failed to load contract: ' + error.message, 'error');
+            }
+        }
+
+        async function updateContractInfo() {
+            try {
+                const [period, startTime, endTime, active, reportCount] = await contract.getCurrentPeriodInfo();
+                const timeRemaining = await contract.getTimeRemainingInPeriod();
+
+                document.getElementById('currentPeriod').textContent = period.toString();
+                document.getElementById('periodActive').textContent = active ? 'Yes' : 'No';
+                document.getElementById('reportCount').textContent = reportCount.toString();
+                document.getElementById('timeRemaining').textContent = formatTime(timeRemaining.toNumber());
+
+                // Update period select for doctors
+                const periodSelect = document.getElementById('periodSelect');
+                periodSelect.innerHTML = `<option value="${period}">Period ${period}</option>`;
+
+                // Check patient report status
+                if (userAddress) {
+                    const [hasReported, timestamp] = await contract.getPatientReportStatus(userAddress);
+                    const statusDiv = document.getElementById('patientReportStatus');
+                    if (hasReported) {
+                        statusDiv.innerHTML = `<div class="alert alert-success">✅ You have already reported for this period (${new Date(timestamp * 1000).toLocaleString()})</div>`;
+                    } else if (active) {
+                        statusDiv.innerHTML = `<div class="alert alert-warning">⏳ You haven't reported for this period yet</div>`;
+                    } else {
+                        statusDiv.innerHTML = `<div class="alert alert-error">❌ Reporting period is not active</div>`;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Failed to update contract info:', error);
+            }
+        }
+
+        async function checkUserPermissions() {
+            if (!contract || !userAddress) return;
+
+            try {
+                const isPatient = await contract.authorizedPatients(userAddress);
+                const isDoctor = await contract.authorizedDoctors(userAddress);
+                const owner = await contract.owner();
+                const isOwner = userAddress.toLowerCase() === owner.toLowerCase();
+
+                let permissionMsg = '';
+                if (isOwner) permissionMsg += '👑 Owner ';
+                if (isDoctor) permissionMsg += '👨‍⚕️ Doctor ';
+                if (isPatient) permissionMsg += '👤 Patient ';
+
+                if (permissionMsg) {
+                    showAlert(`Your permissions: ${permissionMsg}`, 'success');
+                } else {
+                    showAlert('You have no special permissions on this contract', 'warning');
+                }
+
+            } catch (error) {
+                console.error('Failed to check permissions:', error);
+            }
+        }
+
+        async function submitHealthData(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('Please load contract first', 'error');
+                return;
+            }
+
+            const heartRate = document.getElementById('heartRate').value;
+            const systolic = document.getElementById('systolic').value;
+            const diastolic = document.getElementById('diastolic').value;
+            const glucose = document.getElementById('glucose').value;
+            const temperature = Math.round(document.getElementById('temperature').value);
+
+            try {
+                showLoading('Submitting health data...');
+
+                const tx = await contract.submitHealthData(
+                    heartRate, systolic, diastolic, glucose, temperature
+                );
+
+                showAlert('Transaction submitted. Waiting for confirmation...', 'warning');
+                await tx.wait();
+                showAlert('Health data submitted successfully!', 'success');
+
+                // Clear form
+                document.querySelector('.health-form').reset();
+
+                // Update contract info
+                await updateContractInfo();
+
+            } catch (error) {
+                console.error('Failed to submit health data:', error);
+                showAlert('Failed to submit health data: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function startNewPeriod() {
+            if (!contract) {
+                showAlert('Please load contract first', 'error');
+                return;
+            }
+
+            try {
+                showLoading('Starting new period...');
+                const tx = await contract.startNewPeriod();
+                await tx.wait();
+                showAlert('New period started successfully!', 'success');
+                await updateContractInfo();
+            } catch (error) {
+                console.error('Failed to start new period:', error);
+                showAlert('Failed to start new period: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function authorizePatient() {
+            const address = document.getElementById('patientAddress').value;
+            if (!address || !contract) {
+                showAlert('Please enter patient address and load contract first', 'error');
+                return;
+            }
+
+            try {
+                showLoading('Authorizing patient...');
+                const tx = await contract.authorizePatient(address);
+                await tx.wait();
+                showAlert('Patient authorized successfully!', 'success');
+                document.getElementById('patientAddress').value = '';
+            } catch (error) {
+                console.error('Failed to authorize patient:', error);
+                showAlert('Failed to authorize patient: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function authorizeDoctor() {
+            const address = document.getElementById('doctorAddress').value;
+            if (!address || !contract) {
+                showAlert('Please enter doctor address and load contract first', 'error');
+                return;
+            }
+
+            try {
+                showLoading('Authorizing doctor...');
+                const tx = await contract.authorizeDoctor(address);
+                await tx.wait();
+                showAlert('Doctor authorized successfully!', 'success');
+                document.getElementById('doctorAddress').value = '';
+            } catch (error) {
+                console.error('Failed to authorize doctor:', error);
+                showAlert('Failed to authorize doctor: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function generateSummary() {
+            if (!contract) {
+                showAlert('Please load contract first', 'error');
+                return;
+            }
+
+            try {
+                showLoading('Generating period summary...');
+                const tx = await contract.generatePeriodSummary();
+                await tx.wait();
+                showAlert('Period summary generated successfully!', 'success');
+                await updateContractInfo();
+            } catch (error) {
+                console.error('Failed to generate summary:', error);
+                showAlert('Failed to generate summary: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function requestEmergencyAccess() {
+            const patientAddress = document.getElementById('emergencyPatient').value;
+            const periodNumber = document.getElementById('emergencyPeriod').value;
+
+            if (!patientAddress || !periodNumber || !contract) {
+                showAlert('Please fill all fields and load contract first', 'error');
+                return;
+            }
+
+            try {
+                showLoading('Requesting emergency access...');
+                const tx = await contract.requestEmergencyAccess(patientAddress, periodNumber);
+                await tx.wait();
+                showAlert('Emergency access granted!', 'success');
+                document.getElementById('emergencyPatient').value = '';
+                document.getElementById('emergencyPeriod').value = '';
+            } catch (error) {
+                console.error('Failed to request emergency access:', error);
+                showAlert('Failed to request emergency access: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function setupEventListeners() {
+            if (!contract) return;
+
+            contract.on('PeriodStarted', (period, startTime) => {
+                addEvent(`🚀 New period ${period} started`);
+                updateContractInfo();
+            });
+
+            contract.on('HealthDataSubmitted', (patient, period) => {
+                addEvent(`📊 Health data submitted by ${patient.slice(0,6)}...${patient.slice(-4)} for period ${period}`);
+                updateContractInfo();
+            });
+
+            contract.on('AlertTriggered', (patient, period, alertType) => {
+                addEvent(`🚨 Health Alert: ${alertType} for patient ${patient.slice(0,6)}...${patient.slice(-4)}`);
+            });
+
+            contract.on('PatientAuthorized', (patient) => {
+                addEvent(`👤 Patient authorized: ${patient.slice(0,6)}...${patient.slice(-4)}`);
+            });
+
+            contract.on('DoctorAuthorized', (doctor) => {
+                addEvent(`👨‍⚕️ Doctor authorized: ${doctor.slice(0,6)}...${doctor.slice(-4)}`);
+            });
+
+            contract.on('SummaryGenerated', (period, totalReports) => {
+                addEvent(`📋 Summary generated for period ${period} with ${totalReports} reports`);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('connectionIndicator');
+            const status = document.getElementById('connectionStatus');
+
+            if (connected) {
+                indicator.classList.add('connected');
+                status.textContent = `Connected: ${userAddress?.slice(0,6)}...${userAddress?.slice(-4)}`;
+            } else {
+                indicator.classList.remove('connected');
+                status.textContent = 'Disconnected';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            // Insert at the top of the container
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild.nextSibling);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loadingIndicator';
+            loadingDiv.className = 'alert alert-warning';
+            loadingDiv.innerHTML = `<span class="loading"></span>${message}`;
+
+            const container = document.querySelector('.container');
+            container.insertBefore(loadingDiv, container.firstChild.nextSibling);
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) loading.remove();
+        }
+
+        function addEvent(message) {
+            const eventsLog = document.getElementById('eventsLog');
+            const eventDiv = document.createElement('div');
+            eventDiv.style.cssText = 'padding: 10px; border-bottom: 1px solid #e2e8f0; color: #2d3748;';
+            eventDiv.innerHTML = `<small style="color: #718096;">${new Date().toLocaleTimeString()}</small><br>${message}`;
+
+            if (eventsLog.firstChild.textContent === 'No events yet...') {
+                eventsLog.innerHTML = '';
+            }
+
+            eventsLog.insertBefore(eventDiv, eventsLog.firstChild);
+
+            // Keep only last 10 events
+            while (eventsLog.children.length > 10) {
+                eventsLog.removeChild(eventsLog.lastChild);
+            }
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            if (seconds === 0) return 'Period ended';
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+
+        // Auto-refresh contract info every 30 seconds
+        setInterval(() => {
+            if (contract) {
+                updateContractInfo();
+            }
+        }, 30000);
+
+        // Check if wallet is already connected
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    await connectWallet();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
