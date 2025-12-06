@@ -236,7 +236,7 @@ privacy-health-monitor/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/privacy-health-monitor.git
+git clone https://github.com/JustusSchiller/Privacy-Health-Monitor.git
 cd privacy-health-monitor
 
 # Install dependencies
@@ -962,7 +962,7 @@ A complete demonstration video is included with this submission:
 
 ### Watch Online
 
-🎥 **[Watch Demo Video on YouTube](https://youtu.be/YOUR_VIDEO_ID)** *(Update with actual link)*
+🎥 **[Watch Demo Video](https://streamable.com/o3tjd9)** *(Update with actual link)*
 
 ---
 
@@ -1058,7 +1058,7 @@ We welcome contributions to improve Privacy Health Monitor!
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/privacy-health-monitor.git
+git clone https://github.com/JustusSchiller/Privacy-Health-Monitor.git
 cd privacy-health-monitor
 
 # Install dependencies
@@ -1181,8 +1181,8 @@ Special thanks to:
 
 ### Get Help
 
-- **GitHub Issues:** [https://github.com/yourusername/privacy-health-monitor/issues](https://github.com/yourusername/privacy-health-monitor/issues)
-- **Discussions:** [https://github.com/yourusername/privacy-health-monitor/discussions](https://github.com/yourusername/privacy-health-monitor/discussions)
+- **GitHub Issues:** [https://github.com/JustusSchiller/Privacy-Health-Monitor/issues](https://github.com/JustusSchiller/Privacy-Health-Monitor/issues)
+- **Discussions:** [https://github.com/JustusSchiller/Privacy-Health-Monitor/discussions](https://github.com/JustusSchiller/Privacy-Health-Monitor/discussions)
 - **Discord:** Join Zama Discord for FHEVM questions
 
 ### Follow Development
@@ -1217,13 +1217,13 @@ Special thanks to:
 
 | Resource | Link |
 |----------|------|
-| 📹 Demo Video | [Watch on YouTube](#demo-video) |
+| 📹 Demo Video | [Watch](https://streamable.com/o3tjd9) |
 | 📖 Full Documentation | [View Docs](./docs/) |
 | 🚀 Deployment Guide | [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) |
 | 🤝 Contributing | [CONTRIBUTING.md](./CONTRIBUTING.md) |
 | 📜 License | [MIT License](./LICENSE) |
-| 🐛 Report Bug | [GitHub Issues](https://github.com/yourusername/privacy-health-monitor/issues) |
-| 💡 Request Feature | [GitHub Discussions](https://github.com/yourusername/privacy-health-monitor/discussions) |
+| 🐛 Report Bug | [GitHub Issues](https://github.com/JustusSchiller/Privacy-Health-Monitor/issues) |
+| 💡 Request Feature | [GitHub Discussions](https://github.com/JustusSchiller/Privacy-Health-Monitor/discussions) |
 
 ---
 
